@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 import Cookies from "js-cookie";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE = "";
 
 const api: AxiosInstance = axios.create({
   baseURL: `${API_BASE}/api/v1`,
@@ -134,15 +134,14 @@ export const usersApi = {
 // ─── Consent (public) ─────────────────────────────────────────────────────────
 export const consentApi = {
   getInfo: (token: string) =>
-    axios.get(`${API_BASE}/api/v1/consent/${token}`),
+    api.get(`/consent/${token}`),
   respond: (token: string, action: "accept" | "decline") =>
-    axios.post(`${API_BASE}/api/v1/consent/${token}/respond?action=${action}`),
+    api.post(`/consent/${token}/respond?action=${action}`),
 };
 
-// ─── Verification response (public) ──────────────────────────────────────────
 export const verifyResponseApi = {
   getForm: (token: string) =>
-    axios.get(`${API_BASE}/api/v1/verify-response/${token}`),
+    api.get(`/verify-response/${token}`),
   submit: (token: string, data: Record<string, unknown>) =>
-    axios.post(`${API_BASE}/api/v1/verify-response/${token}`, data),
+    api.post(`/verify-response/${token}`, data),
 };
