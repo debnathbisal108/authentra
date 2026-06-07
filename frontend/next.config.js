@@ -7,6 +7,7 @@ const nextConfig = {
     },
   },
   async rewrites() {
+    console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
     return [
       {
         source: "/api/:path*",
