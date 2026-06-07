@@ -20,10 +20,4 @@ USER appuser
 
 EXPOSE 8000
 
-# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
-
-# Before — hardcoded 8000, Render assigns 10000, process never binds to it
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# After — shell form expands $PORT at runtime
 CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2"]
