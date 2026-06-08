@@ -17,12 +17,20 @@ def _get_fernet() -> Fernet:
     return Fernet(base64.urlsafe_b64encode(hashed))
 
 
+# def hash_password(password: str) -> str:
+#     return pwd_context.hash(password)
+
+
+# def verify_password(plain: str, hashed: str) -> bool:
+#     return pwd_context.verify(plain, hashed)
+
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt hard limit is 72 bytes — truncate to be safe
+    return pwd_context.hash(password[:72])
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return pwd_context.verify(plain[:72], hashed)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
