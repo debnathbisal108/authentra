@@ -67,7 +67,7 @@ class FinalVerdict(str, PyEnum):
 class Organization(Base):
     __tablename__ = "organizations"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
     name = Column(String(255), nullable=False)
     website = Column(String(500))
     company_size = Column(String(50))
@@ -85,8 +85,8 @@ class Organization(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    organization_id = Column(UUID(as_uuid=False), ForeignKey("organizations.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     full_name = Column(String(255), nullable=False)
     hashed_password = Column(String(255), nullable=False)
@@ -106,9 +106,9 @@ class User(Base):
 class Candidate(Base):
     __tablename__ = "candidates"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    organization_id = Column(UUID(as_uuid=False), ForeignKey("organizations.id"), nullable=False)
-    created_by_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=False)
+    created_by_id = Column(String(36), ForeignKey("users.id"), nullable=False)
 
     # Encrypted PII
     full_name = Column(String(255))
@@ -138,8 +138,8 @@ class Candidate(Base):
 class Resume(Base):
     __tablename__ = "resumes"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    candidate_id = Column(UUID(as_uuid=False), ForeignKey("candidates.id"), nullable=False, unique=True)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    candidate_id = Column(String(36), ForeignKey("candidates.id"), nullable=False, unique=True)
     filename = Column(String(255))
     file_type = Column(String(20))
     file_size = Column(Integer)
@@ -156,8 +156,8 @@ class Resume(Base):
 class Consent(Base):
     __tablename__ = "consents"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    candidate_id = Column(UUID(as_uuid=False), ForeignKey("candidates.id"), nullable=False, unique=True)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    candidate_id = Column(String(36), ForeignKey("candidates.id"), nullable=False, unique=True)
     token = Column(String(500), unique=True, nullable=False)
     granted = Column(Boolean, default=False)
     declined = Column(Boolean, default=False)
@@ -175,8 +175,8 @@ class Consent(Base):
 class EmploymentRecord(Base):
     __tablename__ = "employment_records"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    candidate_id = Column(UUID(as_uuid=False), ForeignKey("candidates.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    candidate_id = Column(String(36), ForeignKey("candidates.id"), nullable=False)
     company_name = Column(String(255), nullable=False)
     job_title = Column(String(255))
     start_date = Column(String(50))
@@ -199,8 +199,8 @@ class EmploymentRecord(Base):
 class EducationRecord(Base):
     __tablename__ = "education_records"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    candidate_id = Column(UUID(as_uuid=False), ForeignKey("candidates.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    candidate_id = Column(String(36), ForeignKey("candidates.id"), nullable=False)
     institution_name = Column(String(255), nullable=False)
     degree = Column(String(255))
     field_of_study = Column(String(255))
@@ -220,10 +220,10 @@ class EducationRecord(Base):
 class VerificationRequest(Base):
     __tablename__ = "verification_requests"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    candidate_id = Column(UUID(as_uuid=False), ForeignKey("candidates.id"), nullable=False)
-    employment_record_id = Column(UUID(as_uuid=False), ForeignKey("employment_records.id"), nullable=True)
-    education_record_id = Column(UUID(as_uuid=False), ForeignKey("education_records.id"), nullable=True)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    candidate_id = Column(String(36), ForeignKey("candidates.id"), nullable=False)
+    employment_record_id = Column(String(36), ForeignKey("employment_records.id"), nullable=True)
+    education_record_id = Column(String(36), ForeignKey("education_records.id"), nullable=True)
     verification_type = Column(String(50))  # employment / education
     contact_email = Column(String(255))
     contact_name = Column(String(255))
@@ -249,8 +249,8 @@ class VerificationRequest(Base):
 class VerificationResponse(Base):
     __tablename__ = "verification_responses"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    request_id = Column(UUID(as_uuid=False), ForeignKey("verification_requests.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    request_id = Column(String(36), ForeignKey("verification_requests.id"), nullable=False)
     responder_name = Column(String(255))
     responder_email = Column(String(255))
     responder_title = Column(String(255))
@@ -268,8 +268,8 @@ class VerificationResponse(Base):
 class FraudFlag(Base):
     __tablename__ = "fraud_flags"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    candidate_id = Column(UUID(as_uuid=False), ForeignKey("candidates.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    candidate_id = Column(String(36), ForeignKey("candidates.id"), nullable=False)
     flag_type = Column(String(100))
     description = Column(Text)
     severity = Column(Enum(FraudSeverity), default=FraudSeverity.LOW)
@@ -283,8 +283,8 @@ class FraudFlag(Base):
 class RiskScore(Base):
     __tablename__ = "risk_scores"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    candidate_id = Column(UUID(as_uuid=False), ForeignKey("candidates.id"), nullable=False, unique=True)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    candidate_id = Column(String(36), ForeignKey("candidates.id"), nullable=False, unique=True)
     total_score = Column(Float, default=0.0)
     risk_level = Column(Enum(RiskLevel), default=RiskLevel.LOW)
     employment_score = Column(Float, default=0.0)
@@ -306,9 +306,9 @@ class RiskScore(Base):
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    user_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=True)
-    organization_id = Column(UUID(as_uuid=False), ForeignKey("organizations.id"), nullable=True)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=True)
     action = Column(String(100), nullable=False)
     entity_type = Column(String(100))
     entity_id = Column(String(255))
@@ -323,8 +323,8 @@ class AuditLog(Base):
 class Notification(Base):
     __tablename__ = "notifications"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    user_id = Column(UUID(as_uuid=False), ForeignKey("users.id"), nullable=False)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     title = Column(String(255), nullable=False)
     message = Column(Text)
     notification_type = Column(String(50))
@@ -340,8 +340,8 @@ class Notification(Base):
 class SystemSettings(Base):
     __tablename__ = "system_settings"
 
-    id = Column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
-    organization_id = Column(UUID(as_uuid=False), ForeignKey("organizations.id"), nullable=False, unique=True)
+    id = Column(String(36), primary_key=True, default=gen_uuid)
+    organization_id = Column(String(36), ForeignKey("organizations.id"), nullable=False, unique=True)
     smtp_host = Column(String(255))
     smtp_port = Column(Integer)
     smtp_user = Column(String(255))
