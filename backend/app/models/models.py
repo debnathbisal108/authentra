@@ -6,12 +6,13 @@ from sqlalchemy import (
     DateTime, ForeignKey, Enum, LargeBinary, JSON
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String as SAString
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 
 
 def gen_uuid():
-    return str(uuid.uuid4())
+    return uuid.uuid4()
 
 
 # ─── Enums ────────────────────────────────────────────────────────────────────
@@ -62,6 +63,11 @@ class FinalVerdict(str, PyEnum):
     REJECT = "reject"
 
 
+# Helper so SQLAlchemy always sends the .value (e.g. "org_admin")
+# to PostgreSQL instead of the .name (e.g. "ORG_ADMIN")
+def _enum_values(enum_class):
+    return [e.value for e in enum_class]
+
 # ─── Models ───────────────────────────────────────────────────────────────────
 
 class Organization(Base):
@@ -90,7 +96,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     full_name = Column(String(255), nullable=False)
     hashed_password = Column(String(255), nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.RECRUITER)
+    role = Column(Enum(UserRole, values_callable=_enum_values), default=UserRole.RECRUITER)
     is_active = Column(Boolean, default=True)
     email_verified = Column(Boolean, default=False)
     last_login = Column(DateTime)
@@ -119,7 +125,7 @@ class Candidate(Base):
     # Parsed data
     skills = Column(JSON, default=list)
     raw_text = Column(Text)
-    status = Column(Enum(CandidateStatus), default=CandidateStatus.PENDING_CONSENT)
+    status = Column(Enum(CandidateStatus, values_callable=_enum_values), default=CandidateStatus.PENDING_CONSENT)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -185,7 +191,7 @@ class EmploymentRecord(Base):
     location = Column(String(255))
     description = Column(Text)
     contact_email = Column(String(255))
-    verification_status = Column(Enum(VerificationStatus), default=VerificationStatus.PENDING)
+    verification_status = Column(Enum(VerificationStatus, values_callable=_enum_values), default=VerificationStatus.PENDING)
     verified_title = Column(String(255))
     verified_dates = Column(String(255))
     verifier_notes = Column(Text)
@@ -208,7 +214,7 @@ class EducationRecord(Base):
     end_year = Column(String(10))
     gpa = Column(String(20))
     contact_email = Column(String(255))
-    verification_status = Column(Enum(VerificationStatus), default=VerificationStatus.PENDING)
+    verification_status = Column(Enum(VerificationStatus, values_callable=_enum_values), default=VerificationStatus.PENDING)
     verifier_notes = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -229,7 +235,7 @@ class VerificationRequest(Base):
     contact_name = Column(String(255))
     email_subject = Column(Text)
     email_body = Column(Text)
-    status = Column(Enum(VerificationStatus), default=VerificationStatus.PENDING)
+    status = Column(Enum(VerificationStatus, values_callable=_enum_values), default=VerificationStatus.PENDING)
     sent_at = Column(DateTime)
     opened_at = Column(DateTime)
     replied_at = Column(DateTime)
@@ -272,7 +278,7 @@ class FraudFlag(Base):
     candidate_id = Column(UUID(as_uuid=True), ForeignKey("candidates.id"), nullable=False)
     flag_type = Column(String(100))
     description = Column(Text)
-    severity = Column(Enum(FraudSeverity), default=FraudSeverity.LOW)
+    severity = Column(Enum(FraudSeverity, values_callable=_enum_values), default=FraudSeverity.LOW)
     details = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -286,13 +292,13 @@ class RiskScore(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=gen_uuid)
     candidate_id = Column(UUID(as_uuid=True), ForeignKey("candidates.id"), nullable=False, unique=True)
     total_score = Column(Float, default=0.0)
-    risk_level = Column(Enum(RiskLevel), default=RiskLevel.LOW)
+    risk_level = Column(Enum(RiskLevel, values_callable=_enum_values), default=RiskLevel.LOW)
     employment_score = Column(Float, default=0.0)
     education_score = Column(Float, default=0.0)
     fraud_score = Column(Float, default=0.0)
     public_check_score = Column(Float, default=0.0)
     explanation = Column(Text)
-    final_verdict = Column(Enum(FinalVerdict))
+    final_verdict = Column(Enum(FinalVerdict, values_callable=_enum_values))
     ai_recommendation = Column(Text)
     report_generated = Column(Boolean, default=False)
     report_data = Column(LargeBinary)
