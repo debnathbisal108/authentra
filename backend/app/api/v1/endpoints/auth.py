@@ -118,7 +118,7 @@ async def login(
     db.add(log)
     await db.commit()
 
-    token_data = {"sub": user.id, "org": user.organization_id, "role": user.role.value}
+    token_data = {"sub": str(user.id), "org": str(user.organization_id), "role": user.role.value}
     return TokenResponse(
         access_token=create_access_token(token_data),
         refresh_token=create_refresh_token(token_data),
