@@ -88,8 +88,8 @@ export const candidatesApi = {
   get: (id: string) => api.get(`/candidates/${id}`),
 
   upload: (formData: FormData) =>
-    api.post("/candidates/", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    api.post("candidates/", formData, {
+      headers: { "Content-Type": undefined },
     }),
 
   delete: (id: string) => api.delete(`/candidates/${id}`),
