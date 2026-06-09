@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 const API_BASE = "";
 
 const api: AxiosInstance = axios.create({
-  baseURL: `${API_BASE}/api/v1`,
+  baseURL: `${API_BASE}/api/v1/`,
   headers: { "Content-Type": "application/json" },
   timeout: 30000,
 });
