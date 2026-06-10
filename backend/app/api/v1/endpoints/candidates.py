@@ -45,7 +45,7 @@ async def upload_candidate(
     # Create candidate
     candidate = Candidate(
         organization_id=current_user.organization_id,
-        created_by_id=current_user.id,
+        created_by_id=str(current_user.id),
         status=CandidateStatus.PENDING_CONSENT,
     )
     db.add(candidate)
@@ -53,7 +53,7 @@ async def upload_candidate(
 
     # Create resume record
     resume_record = Resume(
-        candidate_id=candidate.id,
+        candidate_id=str(candidate.id),
         filename=filename,
         file_type=ext,
         file_size=len(file_data),
@@ -64,11 +64,11 @@ async def upload_candidate(
 
     # Audit log
     log = AuditLog(
-        user_id=current_user.id,
+        user_id=str(current_user.id),
         organization_id=current_user.organization_id,
         action="candidate_created",
         entity_type="candidate",
-        entity_id=candidate.id,
+        entity_id=str(candidate.id),
         ip_address=request.client.host if request.client else None,
     )
     db.add(log)
@@ -76,9 +76,10 @@ async def upload_candidate(
 
     # Trigger resume parsing task
     from app.tasks.resume_tasks import parse_resume
-    parse_resume.delay(candidate.id)
+    # parse_resume.delay(candidate.id)
+    parse_resume.delay(str(candidate.id))
 
-    return {"id": candidate.id, "message": "Resume uploaded. Processing will begin shortly."}
+    return {"id": str(candidate.id), "message": "Resume uploaded. Processing will begin shortly."}
 
 
 @router.get("", response_model=List[CandidateResponse])
@@ -151,7 +152,7 @@ async def get_candidate(
         **base,
         "employment_records": [
             {
-                "id": e.id,
+                "id": str(e.id),
                 "company_name": e.company_name,
                 "job_title": e.job_title,
                 "start_date": e.start_date,
@@ -168,7 +169,7 @@ async def get_candidate(
         ],
         "education_records": [
             {
-                "id": e.id,
+                "id": str(e.id),
                 "institution_name": e.institution_name,
                 "degree": e.degree,
                 "field_of_study": e.field_of_study,
@@ -182,7 +183,7 @@ async def get_candidate(
         ],
         "fraud_flags": [
             {
-                "id": f.id,
+                "id": str(f.id),
                 "flag_type": f.flag_type,
                 "description": f.description,
                 "severity": f.severity.value if f.severity else "low",
@@ -336,7 +337,7 @@ async def delete_candidate(
     candidate.skills = []
 
     log = AuditLog(
-        user_id=current_user.id,
+        user_id=str(current_user.id),
         organization_id=current_user.organization_id,
         action="candidate_deleted",
         entity_type="candidate",
@@ -406,7 +407,7 @@ async def export_candidate_data(
 
 def _map_candidate(c: Candidate) -> dict:
     return {
-        "id": c.id,
+        "id": str(c.id),
         "full_name": c.full_name,
         "email": decrypt_field(c.email_encrypted) if c.email_encrypted else None,
         "phone": decrypt_field(c.phone_encrypted) if c.phone_encrypted else None,
@@ -422,7 +423,7 @@ def _map_risk_score(rs):
     if not rs:
         return None
     return {
-        "id": rs.id,
+        "id": str(rs.id),
         "total_score": rs.total_score,
         "risk_level": rs.risk_level.value if rs.risk_level else "low",
         "employment_score": rs.employment_score,
@@ -441,7 +442,7 @@ def _map_consent(c):
     if not c:
         return None
     return {
-        "id": c.id,
+        "id": str(c.id),
         "granted": c.granted,
         "declined": c.declined,
         "granted_at": c.granted_at,
