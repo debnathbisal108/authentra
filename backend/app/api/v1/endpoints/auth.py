@@ -105,7 +105,14 @@ async def login(
     if not user.is_active:
         raise HTTPException(status_code=403, detail="Account deactivated")
 
-    user.last_login = datetime.utcnow()
+    # user.last_login = datetime.utcnow()
+
+    from sqlalchemy import update
+    await db.execute(
+        update(User)
+        .where(User.email == payload.email)
+        .values(last_login=datetime.utcnow())
+    )
 
     # Audit log
     log = AuditLog(
@@ -138,7 +145,7 @@ async def refresh_token(payload: RefreshRequest, db: AsyncSession = Depends(get_
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")
 
-    new_data = {"sub": user.id, "org": user.organization_id, "role": user.role.value}
+    new_data = {"sub": str(user.id), "org": str(user.organization_id), "role": user.role.value}
     return TokenResponse(
         access_token=create_access_token(new_data),
         refresh_token=create_refresh_token(new_data),
