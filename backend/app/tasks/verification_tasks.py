@@ -159,7 +159,7 @@ async def _start_verifications_async(candidate_id: str):
 
             # Trigger fraud and risk analysis
             from app.tasks.analysis_tasks import run_fraud_analysis
-            run_fraud_analysis.delay(candidate_id)
+            run_fraud_analysis.delay(str(candidate_id))
 
             logger.info(f"Verifications started for candidate {candidate_id}")
 
