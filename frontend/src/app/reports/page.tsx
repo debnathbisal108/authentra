@@ -13,12 +13,29 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState<string>("");
 
-  useEffect(() => {
-    candidatesApi.list({ status: "report_ready", limit: 100 })
-      .then((res) => setCandidates(res.data))
-      .finally(() => setLoading(false));
-  }, []);
+  // useEffect(() => {
+  //   candidatesApi.list({ status: "report_ready", limit: 100 })
+  //     .then((res) => setCandidates(res.data))
+  //     .finally(() => setLoading(false));
+  // }, []);
 
+  useEffect(() => {
+    async function load() {
+      try {
+        // List report_ready candidates then fetch each detail to get risk_score
+        const listRes = await candidatesApi.list({ status: "report_ready", limit: 100 });
+        const details = await Promise.all(
+          listRes.data.map((c: Candidate) =>
+            candidatesApi.get(c.id).then((r) => r.data).catch(() => c)
+          )
+        );
+        setCandidates(details);
+      } catch {}
+      setLoading(false);
+    }
+    load();
+  }, []);
+  
   const download = async (candidate: Candidate) => {
     setDownloading(candidate.id);
     try {
