@@ -113,7 +113,7 @@ async def _parse_resume_async(candidate_id: str):
 
             # Trigger consent email
             from app.tasks.consent_tasks import send_consent_email
-            send_consent_email.delay(candidate_id)
+            send_consent_email.delay(str(candidate_id))
 
             logger.info(f"Resume parsed for candidate {candidate_id}")
 
