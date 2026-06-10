@@ -82,7 +82,7 @@ async def _fraud_analysis_async(candidate_id: str):
             await db.commit()
 
             # Run risk scoring
-            run_risk_scoring.delay(candidate_id)
+            run_risk_scoring.delay(str(candidate_id))
 
         except Exception as e:
             logger.error(f"Fraud analysis failed for {candidate_id}: {e}")
