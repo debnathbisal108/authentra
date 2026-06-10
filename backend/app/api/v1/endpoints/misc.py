@@ -246,7 +246,7 @@ async def respond_to_consent(
 
         # Trigger verifications
         from app.tasks.verification_tasks import start_verifications
-        start_verifications.delay(candidate_id)
+        start_verifications.delay(str(candidate_id))
 
         return {"message": "Consent granted. Verification process will begin shortly."}
     else:
@@ -353,7 +353,7 @@ async def submit_verification_response(
 
     # Re-run analysis with updated data
     from app.tasks.analysis_tasks import run_fraud_analysis
-    run_fraud_analysis.delay(vr.candidate_id)
+    run_fraud_analysis.delay(str(vr.candidate_id))
 
     return {"message": "Thank you for your response. It has been recorded."}
 
