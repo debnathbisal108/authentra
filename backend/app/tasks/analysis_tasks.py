@@ -206,7 +206,7 @@ async def _risk_scoring_async(candidate_id: str):
             await db.flush()
 
             # Generate PDF report
-            generate_report.delay(candidate_id)
+            generate_report.delay(str(candidate_id))
 
         except Exception as e:
             logger.error(f"Risk scoring failed for {candidate_id}: {e}")
