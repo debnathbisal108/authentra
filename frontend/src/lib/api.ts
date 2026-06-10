@@ -134,14 +134,15 @@ export const usersApi = {
 // ─── Consent (public) ─────────────────────────────────────────────────────────
 export const consentApi = {
   getInfo: (token: string) =>
-    api.get(`/consent/${token}`),
+    api.get(`consent/${token}`),
   respond: (token: string, action: "accept" | "decline") =>
-    api.post(`/consent/${token}/respond?action=${action}`),
+    api.post(`consent/${token}/respond?action=${action}`),
 };
 
+// ─── Verification response (public) ───────────────────────────────────────────
 export const verifyResponseApi = {
   getForm: (token: string) =>
-    api.get(`/verify-response/${token}`),
+    api.get(`verify-response/${token}`),
   submit: (token: string, data: Record<string, unknown>) =>
-    api.post(`/verify-response/${token}`, data),
+    api.post(`verify-response/${token}`, data),
 };
