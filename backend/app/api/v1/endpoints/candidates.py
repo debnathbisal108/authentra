@@ -33,13 +33,13 @@ router = APIRouter()
 #     db: AsyncSession = Depends(get_db),
 #     current_user: User = Depends(get_current_user),
 # ):
-    async def upload_candidate(
-        request: Request,
-        background_tasks: BackgroundTasks,
-        resume: UploadFile = File(...),
-        db: AsyncSession = Depends(get_db),
-        current_user: User = Depends(get_current_user),
-    ):
+async def upload_candidate(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    resume: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     
         # Validate file type
     filename = resume.filename or ""
