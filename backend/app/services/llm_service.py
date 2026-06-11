@@ -13,7 +13,7 @@ class LLMProvider(ABC):
 
 
 class GeminiProvider(LLMProvider):
-    BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
     async def complete(self, prompt: str, system: Optional[str] = None, json_mode: bool = False) -> str:
         if not settings.GEMINI_API_KEY:
