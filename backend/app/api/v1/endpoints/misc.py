@@ -244,9 +244,18 @@ async def respond_to_consent(
 
         await db.commit()
 
-        # Trigger verifications
-        from app.tasks.verification_tasks import start_verifications
-        start_verifications.delay(str(candidate_id))
+        # # Trigger verifications
+        # from app.tasks.verification_tasks import start_verifications
+        # start_verifications.delay(str(candidate_id))
+
+        # return {"message": "Consent granted. Verification process will begin shortly."}
+
+        try:
+            from app.tasks.verification_tasks import start_verifications
+            start_verifications.delay(str(candidate_id))
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Could not queue verification task: {e}")
 
         return {"message": "Consent granted. Verification process will begin shortly."}
     else:
@@ -351,12 +360,16 @@ async def submit_verification_response(
 
     await db.commit()
 
-    # Re-run analysis with updated data
-    from app.tasks.analysis_tasks import run_fraud_analysis
-    run_fraud_analysis.delay(str(vr.candidate_id))
+     try:
+        from app.tasks.analysis_tasks import run_fraud_analysis
+        run_fraud_analysis.delay(str(vr.candidate_id))
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Could not queue analysis task: {e}")
 
-    return {"message": "Thank you for your response. It has been recorded."}
+    return {"message": "Thank you. Response recorded."}
 
+    
 
 # ─── Settings ─────────────────────────────────────────────────────────────────
 
