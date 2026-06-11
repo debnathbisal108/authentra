@@ -75,12 +75,14 @@ async def upload_candidate(
     await db.commit()
 
     # Trigger resume parsing task
-    from app.tasks.resume_tasks import parse_resume
-    # parse_resume.delay(candidate.id)
-    parse_resume.delay(str(candidate.id))
+    try:
+        from app.tasks.resume_tasks import parse_resume
+        parse_resume.delay(str(candidate.id))
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Could not queue resume task: {e}")
 
     return {"id": str(candidate.id), "message": "Resume uploaded. Processing will begin shortly."}
-
 
 @router.get("", response_model=List[CandidateResponse])
 async def list_candidates(
