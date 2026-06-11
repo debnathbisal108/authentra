@@ -27,12 +27,6 @@ router = APIRouter()
 
 
 @router.post("", status_code=201)
-# async def upload_candidate(
-#     request: Request,
-#     resume: UploadFile = File(...),
-#     db: AsyncSession = Depends(get_db),
-#     current_user: User = Depends(get_current_user),
-# ):
 async def upload_candidate(
     request: Request,
     background_tasks: BackgroundTasks,
