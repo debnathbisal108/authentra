@@ -325,20 +325,15 @@ async def get_verification_form(token: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/verify-response/{token}")
-# async def submit_verification_response(
-#     token: str,
-#     payload: VerificationResponseSubmit,
-#     request: Request,
-#     db: AsyncSession = Depends(get_db),
-# ):
+
     
-    async def submit_verification_response(
-        token: str,
-        payload: VerificationResponseSubmit,
-        request: Request,
-        background_tasks: BackgroundTasks,
-        db: AsyncSession = Depends(get_db),
-    ):
+async def submit_verification_response(
+    token: str,
+    payload: VerificationResponseSubmit,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
 
     """Public endpoint - submit verification response."""
     result = await db.execute(
