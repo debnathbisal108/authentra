@@ -35,4 +35,6 @@ celery_app.conf.update(
     },
     worker_prefetch_multiplier=1,
     task_acks_late=True,
+    broker_use_ssl={"ssl_cert_reqs": None},
+    redis_backend_use_ssl={"ssl_cert_reqs": None},
 )
