@@ -121,13 +121,13 @@ RESUME_PARSE_SYSTEM = """You are an expert HR data extractor. Extract structured
 Return ONLY valid JSON, no markdown, no explanation."""
 
 RESUME_PARSE_PROMPT = """Extract all information from this resume and return a JSON object with these exact fields:
-{
+{{
   "full_name": "string",
   "email": "string or null",
   "phone": "string or null",
   "linkedin": "string or null",
   "employment": [
-    {
+    {{
       "company_name": "string",
       "job_title": "string or null",
       "start_date": "string or null",
@@ -135,24 +135,23 @@ RESUME_PARSE_PROMPT = """Extract all information from this resume and return a J
       "is_current": false,
       "location": "string or null",
       "description": "string or null"
-    }
+    }}
   ],
   "education": [
-    {
+    {{
       "institution_name": "string",
       "degree": "string or null",
       "field_of_study": "string or null",
       "start_year": "string or null",
       "end_year": "string or null",
       "gpa": "string or null"
-    }
+    }}
   ],
   "skills": ["string"]
-}
+}}
 
 Resume text:
 {resume_text}"""
-
 
 FRAUD_ANALYSIS_SYSTEM = """You are an expert background verification fraud analyst.
 Analyze resumes for potential fraud, inconsistencies, and red flags.
