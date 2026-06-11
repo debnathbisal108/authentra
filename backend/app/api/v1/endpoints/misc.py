@@ -215,13 +215,13 @@ async def get_consent_info(token: str, db: AsyncSession = Depends(get_db)):
 #     db: AsyncSession = Depends(get_db),
 # ):
 
-    async def respond_to_consent(
-        token: str,
-        action: str,
-        request: Request,
-        background_tasks: BackgroundTasks,
-        db: AsyncSession = Depends(get_db),
-    ):
+async def respond_to_consent(
+    token: str,
+    action: str,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
 
     """Public endpoint - accept or decline consent."""
     if action not in ("accept", "decline"):
