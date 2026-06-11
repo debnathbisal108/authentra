@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
+# from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request, BackgroundTasks
+from app.tasks.pipeline import run_resume_pipeline
+
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
@@ -24,13 +27,21 @@ router = APIRouter()
 
 
 @router.post("", status_code=201)
-async def upload_candidate(
-    request: Request,
-    resume: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    # Validate file type
+# async def upload_candidate(
+#     request: Request,
+#     resume: UploadFile = File(...),
+#     db: AsyncSession = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+    async def upload_candidate(
+        request: Request,
+        background_tasks: BackgroundTasks,
+        resume: UploadFile = File(...),
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user),
+    ):
+    
+        # Validate file type
     filename = resume.filename or ""
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
     if ext not in ("pdf", "docx", "doc"):
@@ -75,13 +86,14 @@ async def upload_candidate(
     await db.commit()
 
     # Trigger resume parsing task
-    try:
-        from app.tasks.resume_tasks import parse_resume
-        parse_resume.delay(str(candidate.id))
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"Could not queue resume task: {e}")
-
+    # try:
+    #     from app.tasks.resume_tasks import parse_resume
+    #     parse_resume.delay(str(candidate.id))
+    # except Exception as e:
+    #     import logging
+    #     logging.getLogger(__name__).warning(f"Could not queue resume task: {e}")
+    
+    background_tasks.add_task(run_resume_pipeline, str(candidate.id))
     return {"id": str(candidate.id), "message": "Resume uploaded. Processing will begin shortly."}
 
 @router.get("", response_model=List[CandidateResponse])
