@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+# from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
+from app.tasks.pipeline import run_verification_pipeline, run_analysis_pipeline
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from datetime import datetime
@@ -205,12 +208,21 @@ async def get_consent_info(token: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/consent/{token}/respond")
-async def respond_to_consent(
-    token: str,
-    action: str,
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-):
+# async def respond_to_consent(
+#     token: str,
+#     action: str,
+#     request: Request,
+#     db: AsyncSession = Depends(get_db),
+# ):
+
+    async def respond_to_consent(
+        token: str,
+        action: str,
+        request: Request,
+        background_tasks: BackgroundTasks,
+        db: AsyncSession = Depends(get_db),
+    ):
+
     """Public endpoint - accept or decline consent."""
     if action not in ("accept", "decline"):
         raise HTTPException(status_code=400, detail="Action must be 'accept' or 'decline'")
@@ -250,13 +262,14 @@ async def respond_to_consent(
 
         # return {"message": "Consent granted. Verification process will begin shortly."}
 
-        try:
-            from app.tasks.verification_tasks import start_verifications
-            start_verifications.delay(str(candidate_id))
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning(f"Could not queue verification task: {e}")
+        # try:
+        #     from app.tasks.verification_tasks import start_verifications
+        #     start_verifications.delay(str(candidate_id))
+        # except Exception as e:
+        #     import logging
+        #     logging.getLogger(__name__).warning(f"Could not queue verification task: {e}")
 
+        background_tasks.add_task(run_verification_pipeline, str(candidate_id))
         return {"message": "Consent granted. Verification process will begin shortly."}
     else:
         consent.declined = True
@@ -312,12 +325,21 @@ async def get_verification_form(token: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/verify-response/{token}")
-async def submit_verification_response(
-    token: str,
-    payload: VerificationResponseSubmit,
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-):
+# async def submit_verification_response(
+#     token: str,
+#     payload: VerificationResponseSubmit,
+#     request: Request,
+#     db: AsyncSession = Depends(get_db),
+# ):
+    
+    async def submit_verification_response(
+        token: str,
+        payload: VerificationResponseSubmit,
+        request: Request,
+        background_tasks: BackgroundTasks,
+        db: AsyncSession = Depends(get_db),
+    ):
+
     """Public endpoint - submit verification response."""
     result = await db.execute(
         select(VerificationRequest).where(VerificationRequest.token == token)
@@ -360,13 +382,15 @@ async def submit_verification_response(
 
     await db.commit()
 
-     try:
-        from app.tasks.analysis_tasks import run_fraud_analysis
-        run_fraud_analysis.delay(str(vr.candidate_id))
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).warning(f"Could not queue analysis task: {e}")
+    #  try:
+    #     from app.tasks.analysis_tasks import run_fraud_analysis
+    #     run_fraud_analysis.delay(str(vr.candidate_id))
+    # except Exception as e:
+    #     import logging
+    #     logging.getLogger(__name__).warning(f"Could not queue analysis task: {e}")
 
+    background_tasks.add_task(run_analysis_pipeline, str(vr.candidate_id))
+    
     return {"message": "Thank you. Response recorded."}
 
     
