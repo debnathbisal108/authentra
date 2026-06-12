@@ -5,14 +5,24 @@ from app.db.session import AsyncSessionLocal
 logger = logging.getLogger(__name__)
 
 
+# async def run_resume_pipeline(candidate_id: str):
+#     """Parse resume then send consent email."""
+#     try:
+#         await _parse_resume(candidate_id)
+#         await _send_consent_email(candidate_id)
+#     except Exception as e:
+#         logger.error(f"Resume pipeline failed for {candidate_id}: {e}", exc_info=True)
+
 async def run_resume_pipeline(candidate_id: str):
-    """Parse resume then send consent email."""
+    """Parse resume then immediately run full analysis (consent skipped)."""
     try:
         await _parse_resume(candidate_id)
-        await _send_consent_email(candidate_id)
+        await _set_status_consent_granted(candidate_id)
+        await _run_fraud_analysis(candidate_id)
+        await _run_risk_scoring(candidate_id)
+        await _generate_report(candidate_id)
     except Exception as e:
         logger.error(f"Resume pipeline failed for {candidate_id}: {e}", exc_info=True)
-
 
 async def run_verification_pipeline(candidate_id: str):
     """Send verification emails then run analysis."""
@@ -149,6 +159,17 @@ async def _send_consent_email(candidate_id: str):
             consent.email_sent_at = datetime.utcnow()
             await db.commit()
 
+async def _set_status_consent_granted(candidate_id: str):
+    """Skip consent flow — mark candidate as consent granted immediately."""
+    from sqlalchemy import select
+    from app.models.models import Candidate, CandidateStatus
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(Candidate).where(Candidate.id == candidate_id))
+        candidate = result.scalar_one_or_none()
+        if candidate:
+            candidate.status = CandidateStatus.CONSENT_GRANTED
+            await db.commit()
 
 async def _start_verifications(candidate_id: str):
     import uuid as uuid_lib
