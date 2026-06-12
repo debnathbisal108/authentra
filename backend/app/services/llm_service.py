@@ -39,7 +39,8 @@ class GeminiProvider(LLMProvider):
 
 class OpenRouterProvider(LLMProvider):
     BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
-    MODEL = "google/gemma-3-12b-it:free"
+    # MODEL = "google/gemma-3-12b-it:free"
+    MODEL= "google/gemma-3-27b-it:free"
 
     async def complete(self, prompt: str, system: Optional[str] = None, json_mode: bool = False) -> str:
         if not settings.OPENROUTER_API_KEY:
